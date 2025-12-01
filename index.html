@@ -1,0 +1,940 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- 1. 검색 엔진 최적화 (SEO) 핵심 태그 -->
+    <title>ETF 수익률 계산기 & 배당 재투자 시뮬레이터 (미국주식/ISA 지원)</title>
+    <meta name="title" content="ETF 수익률 계산기 & 배당 재투자 시뮬레이터 (미국주식/ISA 지원)">
+    <meta name="description" content="매월 적립식 투자 시 10년 뒤 자산은? 야후 파이낸스 실시간 데이터 연동. 미국 주식(SPY, SCHD, QQQ) 및 한국 ISA 계좌 ETF의 복리 수익률과 배당금을 자동으로 계산해 드립니다. 엑셀 없이 간편하게 시뮬레이션하세요.">
+    <meta name="keywords" content="ETF 계산기, 복리 계산기, 배당금 재투자, 미국 주식, 적립식 투자, ISA 계좌, 주식 시뮬레이션, SPY, QQQ, SCHD, 배당 성장, 파이어족, 재테크, 금융 계산기, TIGER 미국테크TOP10">
+    <meta name="author" content="ETF Auto Simulator">
+    <meta name="robots" content="index, follow">
+    
+    <!-- 2. SNS 공유 최적화 (Open Graph) - 카톡/페이스북 공유 시 보이는 내용 -->
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="https://your-website-url.com/"> <!-- 실제 배포 주소로 변경 권장 -->
+    <meta property="og:title" content="내 ETF 포트폴리오의 미래는? | 초간단 수익률 계산기">
+    <meta property="og:description" content="복잡한 엑셀은 그만! 종목만 검색하면 과거 데이터 기반으로 미래 수익과 배당금을 자동으로 계산해줍니다. 지금 바로 확인해보세요.">
+    <meta property="og:image" content="https://cdn-icons-png.flaticon.com/512/2422/2422796.png"> <!-- 썸네일 이미지 주소 -->
+    <meta property="og:site_name" content="ETF Auto Simulator">
+    <meta property="og:locale" content="ko_KR">
+
+    <!-- 3. 트위터 카드 (Twitter Card) -->
+    <meta property="twitter:card" content="summary_large_image">
+    <meta property="twitter:url" content="https://your-website-url.com/">
+    <meta property="twitter:title" content="ETF 적립식 투자 복리 계산기">
+    <meta property="twitter:description" content="실시간 데이터 연동 ETF 시뮬레이터. 배당 재투자 효과를 눈으로 확인하세요.">
+    <meta property="twitter:image" content="https://cdn-icons-png.flaticon.com/512/2422/2422796.png">
+
+    <!-- 4. 웹마스터 도구 인증 (구글/네이버 서치콘솔 등록 시 content에 코드 입력) -->
+    <meta name="google-site-verification" content="구글_서치콘솔_인증코드_입력" />
+    <meta name="naver-site-verification" content="네이버_웹마스터도구_인증코드_입력" />
+    
+    <!-- 5. 구조화된 데이터 (JSON-LD) - 구글이 '소프트웨어 앱'으로 인식하게 함 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebApplication",
+      "name": "ETF Auto Simulator",
+      "url": "https://your-website-url.com/",
+      "description": "미국 및 한국 ETF의 적립식 투자 수익률과 배당금을 계산해주는 웹 기반 금융 시뮬레이션 도구입니다.",
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web Browser",
+      "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "KRW"
+      },
+      "featureList": "실시간 주가 연동, 배당금 재투자 계산, ISA 계좌 구분, PDF 리포트 저장"
+    }
+    </script>
+    
+    <!-- 라이브러리 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+    <style>
+        @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
+        body { font-family: 'Pretendard', sans-serif; }
+        .ad-area {
+            background-color: #f1f5f9;
+            border: 2px dashed #cbd5e1;
+            display: flex; align-items: center; justify-content: center;
+            color: #94a3b8; font-size: 0.8rem; text-align: center; overflow: hidden;
+        }
+        /* 스크롤바 커스텀 */
+        ::-webkit-scrollbar { width: 8px; }
+        ::-webkit-scrollbar-track { background: #f1f5f9; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        
+        .fade-in { animation: fadeIn 0.3s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800" onclick="closeSuggestions()">
+
+    <header class="bg-white border-b sticky top-0 z-50 shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+            <div class="flex items-center gap-2">
+                <span class="text-2xl">📈</span>
+                <h1 class="text-xl font-bold text-blue-700">ETF Auto Simulator</h1>
+                <span class="text-xs bg-gray-100 text-gray-600 px-2 py-1 rounded-full font-bold ml-2"></span>
+            </div>
+            
+            <!-- 데이터 백업/복원 버튼 -->
+            <div class="flex items-center gap-2 text-sm">
+                <button onclick="exportData()" class="flex items-center gap-1 bg-white border border-slate-300 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition">
+                    <span>📤</span> 내보내기
+                </button>
+                <button onclick="document.getElementById('fileInput').click()" class="flex items-center gap-1 bg-white border border-slate-300 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-50 transition">
+                    <span>📥</span> 불러오기
+                </button>
+                <input type="file" id="fileInput" accept=".json" class="hidden" onchange="importData(this)">
+            </div>
+        </div>
+    </header>
+
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+
+        <!-- [광고] 배너 -->
+        <div class="col-span-1 lg:col-span-12">
+            <!-- 구글 애드센스 반응형 광고 코드가 들어갈 자리 -->
+            <div class="ad-area w-full h-24 rounded-lg">
+                Google AdSense Banner Area<br>
+                (반응형 디스플레이 광고 추천)
+            </div>
+        </div>
+
+        <!-- 좌측: 입력 및 검색 패널 -->
+        <div class="col-span-1 lg:col-span-4 space-y-6">
+            
+            <!-- 1. 종목 검색 (핵심 기능) -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 relative z-40">
+                <h2 class="font-bold text-lg mb-4 text-slate-800">🔍 ETF/주식 종목 검색</h2>
+                
+                <div class="relative">
+                    <div class="flex gap-2 mb-2">
+                        <input type="text" id="tickerInput" 
+                            class="flex-1 p-3 border border-slate-300 rounded-lg font-bold focus:ring-2 focus:ring-blue-500 outline-none uppercase" 
+                            placeholder="예: 360750, SCHD, 삼성전자" autocomplete="off" oninput="handleInput(this.value)" 
+                            aria-label="종목 검색 입력창">
+                        <button onclick="searchAndAddTicker()" id="addBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-4 rounded-lg font-bold transition whitespace-nowrap">추가</button>
+                    </div>
+
+                    <!-- 자동완성 드롭다운 -->
+                    <div id="suggestionBox" class="hidden absolute top-full left-0 w-full bg-white border border-slate-200 rounded-lg shadow-xl max-h-60 overflow-y-auto mt-1 z-50">
+                        <!-- JS로 결과가 여기에 채워집니다 -->
+                    </div>
+                </div>
+
+                <div class="text-xs text-slate-500 mb-4 leading-relaxed bg-slate-50 p-3 rounded-lg border border-slate-100">
+                    <p class="font-bold mb-1">💡 검색 및 사용 팁</p>
+                    <ul class="list-disc pl-4 space-y-1">
+                        <li><strong>한국 ETF:</strong> 6자리 코드(360750) 입력 시 정확도 UP</li>
+                        <li><strong>미국 ETF:</strong> 티커(QQQ, SPY) 또는 영문명 입력</li>
+                        <li>데이터는 브라우저에 <strong>자동 저장</strong>됩니다.</li>
+                    </ul>
+                </div>
+
+                <!-- 검색된 종목 리스트 (포트폴리오) -->
+                <div class="border-t pt-4">
+                    <div class="flex justify-between items-center mb-2">
+                        <h3 class="font-bold text-sm text-slate-700">내 포트폴리오</h3>
+                        <span id="totalAlloc" class="text-xs font-bold text-red-500">0%</span>
+                    </div>
+                    
+                    <div id="portfolioList" class="space-y-3 max-h-[300px] overflow-y-auto pr-1 min-h-[50px]">
+                        <!-- JS로 추가됨 -->
+                    </div>
+                    
+                    <div id="emptyMsg" class="text-center text-sm text-slate-400 py-8 border-2 border-dashed border-slate-200 rounded-lg mt-2">
+                        위에서 검색하여<br>종목을 추가해주세요.
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. 투자 설정 -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
+                <h2 class="font-bold text-lg mb-4">⚙️ 적립식 투자 설정</h2>
+                
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-500 mb-1" for="inputAmount">매달 투자 금액 (월 적립액)</label>
+                    <input type="text" id="inputAmount" class="w-full p-2 border border-slate-300 rounded text-right font-bold text-lg" value="1,000,000">
+                    <div id="koreanMoney" class="text-xs text-blue-600 text-right mt-1">일백만 원</div>
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-xs font-bold text-slate-500 mb-1" for="inputYears">투자 기간: <span id="yearVal" class="text-blue-600">10년</span></label>
+                    <input type="range" id="inputYears" min="1" max="30" value="10" class="w-full accent-blue-600">
+                </div>
+
+                <div class="flex items-center justify-between">
+                    <span class="text-sm font-bold text-slate-700">배당금 재투자 (복리 효과)</span>
+                    <input type="checkbox" id="reinvest" class="w-5 h-5 accent-blue-600" checked>
+                </div>
+            </div>
+
+            <button onclick="runSimulation()" class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 rounded-xl shadow-lg transition transform active:scale-95">
+                수익률 계산하기 🚀
+            </button>
+        </div>
+
+        <!-- 우측: 결과 리포트 영역 -->
+        <div class="col-span-1 lg:col-span-8 space-y-6" id="reportArea">
+            
+            <div class="flex flex-col sm:flex-row justify-between items-end sm:items-center mb-2 gap-2">
+                <h2 class="text-xl font-bold text-slate-800">📊 투자 시뮬레이션 리포트</h2>
+                
+                <div class="flex gap-2" data-html2canvas-ignore="true">
+                    <button onclick="downloadReport('image')" class="flex items-center gap-1 bg-white border border-slate-300 hover:bg-slate-50 text-slate-700 px-3 py-1.5 rounded-lg text-sm font-medium transition shadow-sm">
+                        <span>🖼️</span> 이미지 저장
+                    </button>
+                    <button onclick="downloadReport('pdf')" class="flex items-center gap-1 bg-slate-800 hover:bg-slate-900 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition shadow-sm">
+                        <span>📄</span> PDF 저장
+                    </button>
+                </div>
+            </div>
+
+            <!-- 요약 카드 -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-white p-5 rounded-xl border-l-4 border-slate-400 shadow-sm">
+                    <p class="text-xs text-slate-500 mb-1">총 투자 원금</p>
+                    <p id="resPrincipal" class="text-2xl font-bold text-slate-700">0원</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border-l-4 border-green-500 shadow-sm">
+                    <p class="text-xs text-slate-500 mb-1">누적 예상 배당금</p>
+                    <p id="resDividend" class="text-2xl font-bold text-green-600">0원</p>
+                </div>
+                <div class="bg-white p-5 rounded-xl border-l-4 border-blue-600 shadow-sm">
+                    <p class="text-xs text-slate-500 mb-1">최종 평가 자산</p>
+                    <p id="resFinal" class="text-2xl font-bold text-blue-600">0원</p>
+                    <p id="resRoi" class="text-sm font-bold text-blue-400 mt-1">+0%</p>
+                </div>
+            </div>
+
+            <!-- 차트 -->
+            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200 h-80 lg:h-96 relative">
+                 <canvas id="chart"></canvas>
+            </div>
+
+            <!-- 데이터 테이블 -->
+            <div class="bg-white p-6 rounded-xl shadow-sm">
+                <h3 class="font-bold text-slate-700 mb-4">📈 포트폴리오 구성 및 상세 데이터</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-sm text-left text-slate-500">
+                        <thead class="bg-slate-100 text-xs uppercase">
+                            <tr>
+                                <th class="px-4 py-2">종목명</th>
+                                <th class="px-4 py-2">현재가</th>
+                                <th class="px-4 py-2">계좌구분</th>
+                                <th class="px-4 py-2">과거성장률(5Y)</th>
+                                <th class="px-4 py-2">배당률</th>
+                                <th class="px-4 py-2" data-html2canvas-ignore="true">관리</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dataTableBody">
+                            <!-- 데이터 -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
+             <!-- [광고] 하단 -->
+            <div class="ad-area w-full h-24 rounded-lg" data-html2canvas-ignore="true">
+                Google AdSense In-feed Ad Area<br>
+                (인피드 광고 추천)
+            </div>
+            
+            <div class="text-center text-xs text-slate-400 mt-4 pb-4">
+                Generated by ETF Auto Simulator • 이 시뮬레이션은 과거 데이터를 기반으로 한 예측치이며, 미래의 수익을 보장하지 않습니다.
+            </div>
+        </div>
+    </main>
+
+    <!-- 로딩 오버레이 -->
+    <div id="loading" class="hidden fixed inset-0 bg-black/50 z-[60] flex items-center justify-center">
+        <div class="bg-white p-6 rounded-xl flex flex-col items-center animate-bounce-in shadow-2xl">
+            <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-600 mb-2"></div>
+            <p class="font-bold text-slate-700 text-lg" id="loadingTitle">처리 중...</p>
+            <p class="text-sm text-slate-500 mt-1" id="loadingText">잠시만 기다려주세요</p>
+        </div>
+    </div>
+    
+    <!-- 토스트 메시지 (저장/로드 알림용) -->
+    <div id="toast" class="hidden fixed bottom-4 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-4 py-2 rounded-lg shadow-lg text-sm z-[70] transition-opacity duration-300 opacity-0">
+        메시지 내용
+    </div>
+
+    <script>
+        const PROXY_BASE = "https://corsproxy.io/?"; 
+        
+        let portfolio = []; 
+        let myChart = null;
+        let searchTimeout = null; 
+
+        // --- 로컬 스토리지 키 ---
+        const STORAGE_KEY = 'etf_sim_data_v1';
+
+        // --- 초기화: 페이지 로드 시 저장된 데이터 불러오기 ---
+        window.addEventListener('DOMContentLoaded', () => {
+            loadFromLocal();
+        });
+
+        // --- 데이터 저장/로드 로직 ---
+        function saveToLocal() {
+            const dataToSave = {
+                portfolio: portfolio,
+                settings: {
+                    amount: document.getElementById('inputAmount').value,
+                    years: document.getElementById('inputYears').value,
+                    reinvest: document.getElementById('reinvest').checked
+                },
+                timestamp: Date.now()
+            };
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+        }
+
+        function loadFromLocal() {
+            const savedData = localStorage.getItem(STORAGE_KEY);
+            if (savedData) {
+                try {
+                    const parsed = JSON.parse(savedData);
+                    if (parsed.portfolio) {
+                        portfolio = parsed.portfolio;
+                        updatePortfolioUI();
+                    }
+                    if (parsed.settings) {
+                        document.getElementById('inputAmount').value = parsed.settings.amount || "1,000,000";
+                        document.getElementById('inputYears').value = parsed.settings.years || 10;
+                        document.getElementById('reinvest').checked = parsed.settings.reinvest !== false;
+                        
+                        const amtInput = document.getElementById('inputAmount');
+                        const yearInput = document.getElementById('inputYears');
+                        
+                        const val = amtInput.value.replace(/[^0-9]/g,'');
+                        document.getElementById('koreanMoney').innerText = numToKor(parseMoney(val));
+                        document.getElementById('yearVal').innerText = yearInput.value + "년";
+                    }
+                    if (portfolio.length > 0) {
+                        setTimeout(runSimulation, 500);
+                    }
+                } catch (e) {
+                    console.error("Load failed", e);
+                }
+            }
+        }
+
+        // --- 파일 내보내기/불러오기 로직 ---
+        function exportData() {
+            const dataToSave = {
+                portfolio: portfolio,
+                settings: {
+                    amount: document.getElementById('inputAmount').value,
+                    years: document.getElementById('inputYears').value,
+                    reinvest: document.getElementById('reinvest').checked
+                },
+                exportDate: new Date().toISOString()
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dataToSave));
+            const downloadAnchorNode = document.createElement('a');
+            downloadAnchorNode.setAttribute("href", dataStr);
+            downloadAnchorNode.setAttribute("download", "etf_portfolio_backup.json");
+            document.body.appendChild(downloadAnchorNode); 
+            downloadAnchorNode.click();
+            downloadAnchorNode.remove();
+            
+            showToast("데이터 파일이 다운로드되었습니다.");
+        }
+
+        function importData(input) {
+            const file = input.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const parsed = JSON.parse(e.target.result);
+                    if (!parsed.portfolio || !parsed.settings) throw new Error("Invalid file format");
+
+                    portfolio = parsed.portfolio;
+                    document.getElementById('inputAmount').value = parsed.settings.amount;
+                    document.getElementById('inputYears').value = parsed.settings.years;
+                    document.getElementById('reinvest').checked = parsed.settings.reinvest;
+
+                    updatePortfolioUI();
+                    const val = parsed.settings.amount.replace(/[^0-9]/g,'');
+                    document.getElementById('koreanMoney').innerText = numToKor(parseMoney(val));
+                    document.getElementById('yearVal').innerText = parsed.settings.years + "년";
+                    
+                    saveToLocal();
+                    showToast("데이터를 성공적으로 불러왔습니다.");
+                    setTimeout(runSimulation, 300);
+
+                } catch (err) {
+                    alert("파일을 읽는 중 오류가 발생했습니다.");
+                }
+            };
+            reader.readAsText(file);
+            input.value = '';
+        }
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            toast.innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.remove('opacity-0'), 10);
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
+        }
+
+        // --- 유틸리티 ---
+        const formatMoney = n => Math.round(n).toLocaleString() + '원';
+        const parseMoney = s => parseInt(s.replace(/,/g, '')) || 0;
+        
+        const numToKor = (num) => {
+            if(num===0) return "0원";
+            const units = ["", "만", "억", "조"];
+            let unitIdx = 0; let result = "";
+            while(num > 0) {
+                let mod = num % 10000;
+                if(mod > 0) result = mod.toLocaleString() + units[unitIdx] + " " + result;
+                num = Math.floor(num / 10000);
+                unitIdx++;
+            }
+            return result + "원";
+        };
+
+        const amtInput = document.getElementById('inputAmount');
+        amtInput.addEventListener('input', (e) => {
+            const val = e.target.value.replace(/[^0-9]/g,'');
+            e.target.value = val ? parseInt(val).toLocaleString() : '';
+            document.getElementById('koreanMoney').innerText = numToKor(parseMoney(val));
+            saveToLocal();
+        });
+        
+        document.getElementById('inputYears').addEventListener('input', (e)=>{
+            document.getElementById('yearVal').innerText = e.target.value + "년";
+            saveToLocal();
+        });
+
+        document.getElementById('reinvest').addEventListener('change', () => {
+            saveToLocal();
+        });
+
+        document.getElementById('tickerInput').addEventListener('keypress', (e)=>{
+            if(e.key === 'Enter') searchAndAddTicker();
+        });
+
+        // --- PDF/이미지 다운로드 ---
+        async function downloadReport(type) {
+            const element = document.getElementById('reportArea');
+            const loadingEl = document.getElementById('loading');
+            const loadingTitle = document.getElementById('loadingTitle');
+            const loadingText = document.getElementById('loadingText');
+
+            loadingEl.classList.remove('hidden');
+            loadingTitle.innerText = type === 'pdf' ? "PDF 생성 중..." : "이미지 저장 중...";
+            loadingText.innerText = "리포트를 캡처하고 있습니다.";
+
+            try {
+                const canvas = await html2canvas(element, {
+                    scale: 2,
+                    backgroundColor: '#ffffff',
+                    useCORS: true,
+                    logging: false
+                });
+
+                const imgData = canvas.toDataURL('image/png');
+
+                if (type === 'image') {
+                    const link = document.createElement('a');
+                    link.href = imgData;
+                    link.download = `ETF_Simulation_Report_${new Date().toISOString().slice(0,10)}.png`;
+                    link.click();
+                } else if (type === 'pdf') {
+                    const { jsPDF } = window.jspdf;
+                    const pdf = new jsPDF('p', 'mm', 'a4');
+                    const imgWidth = 210;
+                    const pageHeight = 297;
+                    const imgHeight = canvas.height * imgWidth / canvas.width;
+                    
+                    let heightLeft = imgHeight;
+                    let position = 0;
+
+                    pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                    heightLeft -= pageHeight;
+
+                    while (heightLeft >= 0) {
+                        position = heightLeft - imgHeight;
+                        pdf.addPage();
+                        pdf.addImage(imgData, 'PNG', 0, position, imgWidth, imgHeight);
+                        heightLeft -= pageHeight;
+                    }
+
+                    pdf.save(`ETF_Simulation_Report_${new Date().toISOString().slice(0,10)}.pdf`);
+                }
+
+            } catch (error) {
+                console.error("다운로드 실패:", error);
+                alert("다운로드 중 오류가 발생했습니다.");
+            } finally {
+                loadingEl.classList.add('hidden');
+            }
+        }
+
+        // --- 1. 자동완성 ---
+        function handleInput(query) {
+            clearTimeout(searchTimeout);
+            const box = document.getElementById('suggestionBox');
+            if(!query || query.length < 1) {
+                box.classList.add('hidden');
+                return;
+            }
+            searchTimeout = setTimeout(() => {
+                fetchSuggestions(query);
+            }, 300);
+        }
+
+        async function fetchSuggestions(query) {
+            const searchUrl = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=6&newsCount=0`;
+            const proxyUrl = PROXY_BASE + encodeURIComponent(searchUrl);
+            try {
+                const res = await fetch(proxyUrl);
+                const data = await res.json();
+                if(data.quotes && data.quotes.length > 0) {
+                    renderSuggestions(data.quotes);
+                } else {
+                    document.getElementById('suggestionBox').classList.add('hidden');
+                }
+            } catch (err) {
+                console.warn("자동완성 실패 (무시됨):", err);
+            }
+        }
+
+        function renderSuggestions(quotes) {
+            const box = document.getElementById('suggestionBox');
+            box.innerHTML = '';
+            const validQuotes = quotes.filter(q => q.quoteType === 'ETF' || q.quoteType === 'EQUITY' || q.quoteType === 'MUTUALFUND');
+            if(validQuotes.length === 0) {
+                box.classList.add('hidden');
+                return;
+            }
+
+            validQuotes.forEach(q => {
+                const div = document.createElement('div');
+                div.className = "p-3 hover:bg-slate-100 cursor-pointer border-b border-slate-100 last:border-0";
+                
+                const isKRW = q.symbol.endsWith('.KS') || q.symbol.endsWith('.KQ'); 
+                const isaBadge = isKRW ? '<span class="text-[10px] bg-green-100 text-green-700 px-1 rounded ml-1 font-bold">ISA</span>' : '';
+
+                div.innerHTML = `
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <span class="font-bold text-blue-700 mr-2">${q.symbol}</span>${isaBadge}
+                            <span class="text-sm text-slate-600 truncate max-w-[180px] inline-block align-bottom">${q.shortname || q.longname || ''}</span>
+                        </div>
+                        <span class="text-xs bg-slate-200 text-slate-600 px-2 py-0.5 rounded">${q.exchDisp || 'US'}</span>
+                    </div>
+                `;
+                div.onclick = (e) => {
+                    e.stopPropagation();
+                    document.getElementById('tickerInput').value = q.symbol; 
+                    closeSuggestions();
+                    searchAndAddTicker(q.symbol); 
+                };
+                box.appendChild(div);
+            });
+            box.classList.remove('hidden');
+        }
+
+        function closeSuggestions() {
+            setTimeout(() => {
+                document.getElementById('suggestionBox').classList.add('hidden');
+            }, 200);
+        }
+
+        // --- 2. 데이터 처리 ---
+        async function fetchChartData(ticker) {
+            try {
+                const chartUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1mo&range=5y`;
+                const proxyUrl = PROXY_BASE + encodeURIComponent(chartUrl);
+                const res = await fetch(proxyUrl);
+                if(!res.ok) return null;
+                const data = await res.json();
+                if(!data.chart || !data.chart.result || data.chart.result.length === 0) return null;
+                return data.chart.result[0];
+            } catch(e) {
+                console.error("Chart fetch error:", e);
+                return null;
+            }
+        }
+
+        async function fetchFirstSymbol(query) {
+            try {
+                const searchUrl = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=1`;
+                const proxyUrl = PROXY_BASE + encodeURIComponent(searchUrl);
+                const res = await fetch(proxyUrl);
+                const data = await res.json();
+                if(data.quotes && data.quotes.length > 0) {
+                    return data.quotes[0].symbol;
+                }
+                return null;
+            } catch(e) { return null; }
+        }
+
+        async function searchAndAddTicker(manualTicker = null) {
+            let query = manualTicker || document.getElementById('tickerInput').value.trim();
+            if(!query) return;
+
+            if(manualTicker && portfolio.find(p => p.ticker === manualTicker)) {
+                alert("이미 추가된 종목입니다.");
+                document.getElementById('tickerInput').value = '';
+                return;
+            }
+
+            const loadingEl = document.getElementById('loading');
+            const loadingTitle = document.getElementById('loadingTitle');
+            const loadingText = document.getElementById('loadingText');
+            
+            loadingEl.classList.remove('hidden');
+            loadingTitle.innerText = "처리 중...";
+            
+            try {
+                let tickerToFetch = "";
+                let chartResult = null;
+                
+                if (manualTicker) {
+                    tickerToFetch = manualTicker;
+                    loadingText.innerText = `'${tickerToFetch}' 데이터 로딩 중...`;
+                    chartResult = await fetchChartData(tickerToFetch);
+                } else {
+                    if (/^\d{6}$/.test(query)) {
+                        loadingText.innerText = `'${query}' 한국 종목코드 확인 중...`;
+                        let testTicker = query + ".KS";
+                        let testResult = await fetchChartData(testTicker);
+                        if (!testResult) {
+                            testTicker = query + ".KQ";
+                            testResult = await fetchChartData(testTicker);
+                        }
+                        if (testResult) {
+                            tickerToFetch = testTicker;
+                            chartResult = testResult;
+                        }
+                    }
+
+                    if (!chartResult) {
+                        loadingText.innerText = `'${query}' 종목 찾는 중...`;
+                        const foundSymbol = await fetchFirstSymbol(query);
+                        if (foundSymbol) {
+                            tickerToFetch = foundSymbol;
+                            loadingText.innerText = `'${tickerToFetch}' 데이터 로딩 중...`;
+                            chartResult = await fetchChartData(tickerToFetch);
+                        } else {
+                            tickerToFetch = query.toUpperCase();
+                            loadingText.innerText = `'${tickerToFetch}' 데이터 확인 중...`;
+                            chartResult = await fetchChartData(tickerToFetch);
+                        }
+                    }
+                }
+
+                if(!chartResult) throw new Error("Data Not Found");
+
+                if(portfolio.find(p => p.ticker === tickerToFetch)) {
+                    alert(`'${tickerToFetch}'는 이미 포트폴리오에 있습니다.`);
+                    document.getElementById('tickerInput').value = '';
+                    loadingEl.classList.add('hidden');
+                    return;
+                }
+
+                const meta = chartResult.meta;
+                const quotes = chartResult.indicators.quote[0].close;
+                const currentPrice = meta.regularMarketPrice;
+                const currency = meta.currency; 
+
+                let isIsaEligible = false;
+                if (currency === 'KRW' || tickerToFetch.endsWith('.KS') || tickerToFetch.endsWith('.KQ')) {
+                    isIsaEligible = true;
+                }
+
+                let cagr = 0;
+                let startPrice = quotes.find(p => p !== null && p !== undefined); 
+                let endPrice = currentPrice;
+                
+                const startTimestamp = chartResult.timestamp[0];
+                const endTimestamp = chartResult.timestamp[chartResult.timestamp.length-1];
+                const yearDiff = (endTimestamp - startTimestamp) / (3600*24*365);
+                
+                if(startPrice && yearDiff > 0.5) {
+                    cagr = (Math.pow(endPrice / startPrice, 1/yearDiff) - 1) * 100;
+                } else {
+                    cagr = 5.0; 
+                }
+
+                let divYield = 0;
+                if(chartResult.events && chartResult.events.dividends) {
+                    const divs = chartResult.events.dividends;
+                    const oneYearAgo = Date.now()/1000 - 31536000;
+                    let totalDiv = 0;
+                    for(let key in divs) {
+                        if(divs[key].date > oneYearAgo) totalDiv += divs[key].amount;
+                    }
+                    divYield = (totalDiv / currentPrice) * 100;
+                }
+                
+                portfolio.push({
+                    ticker: tickerToFetch,
+                    name: query, 
+                    price: currentPrice,
+                    currency: currency,
+                    isIsa: isIsaEligible,
+                    cagr: cagr.toFixed(2),
+                    yield: divYield.toFixed(2),
+                    allocation: 0 
+                });
+
+                updatePortfolioUI();
+                saveToLocal();
+                document.getElementById('tickerInput').value = ''; 
+
+            } catch (err) {
+                console.error(err);
+                alert(`'${query}' 정보를 찾을 수 없습니다.\n정확한 종목코드(6자리)나 영어 티커를 입력해보세요.`);
+            } finally {
+                loadingEl.classList.add('hidden');
+            }
+        }
+
+        // --- 3. UI 업데이트 ---
+        function updatePortfolioUI() {
+            const list = document.getElementById('portfolioList');
+            const tbody = document.getElementById('dataTableBody');
+            const emptyMsg = document.getElementById('emptyMsg');
+            
+            list.innerHTML = '';
+            tbody.innerHTML = '';
+            
+            if(portfolio.length === 0) {
+                emptyMsg.style.display = 'block';
+            } else {
+                emptyMsg.style.display = 'none';
+            }
+
+            let totalAlloc = 0;
+
+            portfolio.forEach((item, index) => {
+                const isaBadge = item.isIsa 
+                    ? `<span class="text-[10px] bg-green-100 text-green-700 font-bold px-1.5 py-0.5 rounded border border-green-200">ISA 가능</span>`
+                    : `<span class="text-[10px] bg-slate-100 text-slate-500 font-bold px-1.5 py-0.5 rounded border border-slate-200">ISA 불가 (직투)</span>`;
+
+                const div = document.createElement('div');
+                div.className = "flex items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200 fade-in shadow-sm";
+                div.innerHTML = `
+                    <div class="flex-1 overflow-hidden">
+                        <div class="flex items-center gap-2 mb-1">
+                            <span class="font-bold text-slate-800">${item.ticker}</span>
+                            ${isaBadge}
+                        </div>
+                        <div class="text-xs text-slate-500">
+                            성장 <span class="text-blue-600 font-bold">${item.cagr}%</span> / 
+                            배당 <span class="text-green-600 font-bold">${item.yield}%</span>
+                        </div>
+                    </div>
+                    <div class="flex flex-col items-end gap-1">
+                        <div class="flex items-center gap-1">
+                            <input type="number" class="w-16 p-1.5 text-right text-sm border border-slate-300 rounded focus:border-blue-500 outline-none font-bold" 
+                                value="${item.allocation}" data-idx="${index}" onchange="updateAlloc(${index}, this.value)">
+                            <span class="text-sm text-slate-500">%</span>
+                        </div>
+                    </div>
+                    <button onclick="removeTicker(${index})" class="text-slate-400 hover:text-red-500 p-1 ml-1">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                `;
+                list.appendChild(div);
+                totalAlloc += parseInt(item.allocation) || 0;
+
+                const tr = document.createElement('tr');
+                tr.className = "border-b hover:bg-slate-50 transition-colors";
+                const currencySymbol = item.currency === 'KRW' ? '₩' : '$';
+                
+                tr.innerHTML = `
+                    <td class="px-4 py-3">
+                        <div class="font-bold text-slate-700">${item.ticker}</div>
+                        <div class="text-xs text-slate-400">${item.currency}</div>
+                    </td>
+                    <td class="px-4 py-3 text-slate-600">
+                        ${currencySymbol}${item.price ? item.price.toLocaleString(undefined, {maximumFractionDigits: 2}) : '-'}
+                    </td>
+                    <td class="px-4 py-3">${isaBadge}</td>
+                    <td class="px-4 py-3 text-blue-600 font-bold bg-blue-50/50">${item.cagr}%</td>
+                    <td class="px-4 py-3 text-green-600 font-bold bg-green-50/50">${item.yield}%</td>
+                    <td class="px-4 py-3" data-html2canvas-ignore="true">
+                         <button onclick="removeTicker(${index})" class="text-xs bg-white border border-red-200 text-red-500 px-3 py-1.5 rounded hover:bg-red-50 transition">삭제</button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const allocSpan = document.getElementById('totalAlloc');
+            allocSpan.innerText = totalAlloc + '%';
+            if(totalAlloc === 100) {
+                allocSpan.className = "text-xs font-bold text-white bg-green-500 px-2 py-0.5 rounded-full";
+            } else {
+                allocSpan.className = "text-xs font-bold text-white bg-red-500 px-2 py-0.5 rounded-full";
+            }
+        }
+
+        function updateAlloc(index, val) {
+            let v = parseInt(val) || 0;
+            if(v < 0) v = 0;
+            if(v > 100) v = 100;
+            portfolio[index].allocation = v;
+            updatePortfolioUI();
+            saveToLocal();
+        }
+
+        function removeTicker(index) {
+            portfolio.splice(index, 1);
+            updatePortfolioUI();
+            saveToLocal();
+        }
+
+        // --- 4. 시뮬레이션 계산 ---
+        function runSimulation() {
+            const monthlyAmt = parseMoney(amtInput.value);
+            const years = parseInt(document.getElementById('inputYears').value);
+            const reinvest = document.getElementById('reinvest').checked;
+
+            const totalAlloc = portfolio.reduce((sum, item) => sum + (parseInt(item.allocation)||0), 0);
+            if(totalAlloc !== 100) {
+                alert(`비중의 합은 100%여야 합니다. (현재 ${totalAlloc}%)`);
+                return;
+            }
+            if(monthlyAmt <= 0) {
+                alert("투자 금액을 입력해주세요.");
+                return;
+            }
+
+            let wCAGR = 0;
+            let wYield = 0;
+            portfolio.forEach(p => {
+                const weight = p.allocation / 100;
+                wCAGR += parseFloat(p.cagr) * weight;
+                wYield += parseFloat(p.yield) * weight;
+            });
+
+            const months = years * 12;
+            const monthlyGrowth = wCAGR / 100 / 12;
+            const monthlyDiv = wYield / 100 / 12;
+
+            let principal = 0;
+            let balance = 0;
+            let totalDivReceived = 0;
+            let cashPocket = 0;
+
+            let labels = [];
+            let dataPrin = [];
+            let dataBal = [];
+
+            for(let i=1; i<=months; i++) {
+                principal += monthlyAmt;
+                balance += monthlyAmt;
+                balance = balance * (1 + monthlyGrowth);
+                
+                let div = balance * monthlyDiv;
+                totalDivReceived += div;
+
+                if(reinvest) {
+                    balance += div;
+                } else {
+                    cashPocket += div;
+                }
+
+                if(i%12 === 0) {
+                    labels.push((i/12) + "년");
+                    dataPrin.push(principal);
+                    dataBal.push(Math.round(reinvest ? balance : balance + cashPocket));
+                }
+            }
+
+            const finalVal = reinvest ? balance : balance + cashPocket;
+            const profit = finalVal - principal;
+            const roi = (profit / principal) * 100;
+
+            document.getElementById('resPrincipal').innerText = formatMoney(principal);
+            document.getElementById('resDividend').innerText = formatMoney(totalDivReceived);
+            document.getElementById('resFinal').innerText = formatMoney(finalVal);
+            document.getElementById('resRoi').innerText = (roi>0?"+":"") + roi.toFixed(1) + "%";
+
+            drawChart(labels, dataPrin, dataBal);
+        }
+
+        function drawChart(labels, d1, d2) {
+            const ctx = document.getElementById('chart').getContext('2d');
+            if(myChart) myChart.destroy();
+
+            myChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        {
+                            label: '순수 원금',
+                            data: d1,
+                            borderColor: '#94a3b8',
+                            backgroundColor: 'rgba(148, 163, 184, 0.1)',
+                            fill: true,
+                            pointRadius: 0,
+                            borderWidth: 2
+                        },
+                        {
+                            label: '예상 평가액',
+                            data: d2,
+                            borderColor: '#2563eb',
+                            backgroundColor: 'rgba(37, 99, 235, 0.1)',
+                            fill: true,
+                            pointRadius: 3,
+                            borderWidth: 2
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: { mode: 'index', intersect: false },
+                    plugins: {
+                        tooltip: {
+                            backgroundColor: 'rgba(255, 255, 255, 0.9)',
+                            titleColor: '#1e293b',
+                            bodyColor: '#334155',
+                            borderColor: '#e2e8f0',
+                            borderWidth: 1,
+                            padding: 10,
+                            callbacks: {
+                                label: (ctx) => ctx.dataset.label + ": " + ctx.raw.toLocaleString() + "원"
+                            }
+                        }
+                    },
+                    scales: {
+                        x: { grid: { display: false } },
+                        y: { 
+                            grid: { borderDash: [2, 4] },
+                            ticks: { callback: (val) => (val/100000000).toFixed(1) + '억' }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
