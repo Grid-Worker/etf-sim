@@ -4,14 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- [보안 정책 수정] img-src와 connect-src를 'https:'로 넓혀서 외부 리소스 차단 문제 해결 -->
+    <!-- [보안 정책] hits.sh 허용 -->
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self'; 
         script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; 
         style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://fonts.googleapis.com;
         font-src 'self' https://fonts.gstatic.com;
-        img-src 'self' data: https:; 
-        connect-src 'self' https:;
+        img-src * data: https://hits.sh; 
+        connect-src *;
     ">
 
     <!-- SEO Meta Tags -->
@@ -31,11 +31,9 @@
     <style>
         @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard/dist/web/static/pretendard.css');
         body { font-family: 'Pretendard', sans-serif; -webkit-font-smoothing: antialiased; }
-        
         .secure-scroll::-webkit-scrollbar { width: 6px; height: 6px; }
         .secure-scroll::-webkit-scrollbar-track { background: #f1f5f9; }
         .secure-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
-        
         .fade-in { animation: fadeIn 0.3s ease-in-out; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
     </style>
@@ -50,14 +48,10 @@
                 <h1 class="text-lg md:text-xl font-bold text-slate-800">RichFolio</h1>
                 <span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold ml-1 border border-green-200">Secure</span>
                 
-                <!-- [Global Visitor Counter] -->
-                <div class="ml-2 pt-1 flex items-center" title="누적 방문자 수">
-                    <a href="https://hits.seeyoufarm.com">
-                        <!-- onerror 추가: 이미지가 깨지면 숨김 처리하여 엑박 아이콘 방지 -->
-                        <img src="https://hits.seeyoufarm.com/api/count/incr/badge.svg?url=https%3A%2F%2Fgrid-worker.github.io%2Fetf-sim%2F&count_bg=%234F46E5&title_bg=%23555555&icon=&icon_color=%23E7E7E7&title=hits&edge_flat=false" 
-                             alt="hits" 
-                             style="min-height: 20px;"
-                             onerror="this.style.display='none'"/>
+                <!-- [Global Visitor Counter - Hits.sh] -->
+                <div class="ml-2 pt-1 flex items-center" title="총 누적 방문자">
+                    <a href="https://hits.sh/grid-worker.github.io/etf-sim/">
+                        <img alt="Hits" src="https://hits.sh/grid-worker.github.io/etf-sim.svg?style=flat&label=Visits&extra=count&color=4f46e5&labelColor=555555"/>
                     </a>
                 </div>
             </div>
@@ -92,7 +86,6 @@
                             placeholder="예: 360750, AAPL" autocomplete="off">
                         <button id="addBtn" class="bg-blue-600 hover:bg-blue-700 text-white px-5 rounded-lg font-bold text-sm transition">추가</button>
                     </div>
-                    <!-- 자동완성 박스 -->
                     <div id="suggestionBox" class="hidden absolute top-full left-0 w-full bg-white border border-slate-200 rounded-lg shadow-xl max-h-52 overflow-y-auto mt-1 z-50 secure-scroll"></div>
                 </div>
 
@@ -103,17 +96,12 @@
                     </ul>
                 </div>
 
-                <!-- 포트폴리오 리스트 -->
                 <div class="border-t pt-4 mt-4">
                     <div class="flex justify-between items-center mb-2">
                         <span class="font-bold text-sm text-slate-700">포트폴리오 비중</span>
                         <span id="totalAlloc" class="text-xs font-bold text-white bg-slate-300 px-2 py-0.5 rounded-full">0%</span>
                     </div>
-                    
-                    <div id="portfolioList" class="space-y-2 max-h-[300px] overflow-y-auto pr-1 secure-scroll min-h-[50px]">
-                        <!-- JS로 안전하게 렌더링됨 -->
-                    </div>
-                    
+                    <div id="portfolioList" class="space-y-2 max-h-[300px] overflow-y-auto pr-1 secure-scroll min-h-[50px]"></div>
                     <div id="emptyMsg" class="text-center text-xs text-slate-400 py-6 border-2 border-dashed border-slate-200 rounded-lg mt-2">
                         포트폴리오가 비어있습니다.
                     </div>
@@ -123,18 +111,15 @@
             <!-- 설정 패널 -->
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
                 <h2 class="font-bold text-slate-800 mb-4">⚙️ 시뮬레이션 설정</h2>
-                
                 <div class="mb-4">
                     <label class="block text-xs font-bold text-slate-500 mb-1">월 투자금</label>
                     <input type="text" id="inputAmount" class="w-full p-2 border border-slate-300 rounded text-right font-bold focus:border-blue-500 outline-none" value="1,000,000">
                     <div id="koreanMoney" class="text-xs text-blue-600 text-right mt-1">일백만 원</div>
                 </div>
-
                 <div class="mb-4">
                     <label class="block text-xs font-bold text-slate-500 mb-1">기간: <span id="yearVal" class="text-blue-600">10년</span></label>
                     <input type="range" id="inputYears" min="1" max="30" value="10" class="w-full accent-blue-600 cursor-pointer">
                 </div>
-
                 <div class="flex items-center justify-between">
                     <span class="text-sm font-bold text-slate-700">배당금 재투자</span>
                     <input type="checkbox" id="reinvest" class="w-5 h-5 accent-blue-600" checked>
@@ -206,7 +191,7 @@
         </div>
     </main>
 
-    <!-- 로딩 모달 -->
+    <!-- 로딩 -->
     <div id="loading" class="hidden fixed inset-0 bg-slate-900/50 z-[60] flex items-center justify-center backdrop-blur-sm">
         <div class="bg-white p-6 rounded-xl flex flex-col items-center shadow-2xl">
             <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mb-3"></div>
@@ -214,13 +199,10 @@
         </div>
     </div>
 
-    <!-- 토스트 메시지 -->
+    <!-- 토스트 -->
     <div id="toast" class="hidden fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-slate-800 text-white px-4 py-2 rounded-full shadow-lg text-sm z-[70] transition-opacity duration-300 opacity-0"></div>
 
     <script>
-        /**
-         * 🛡️ 보안 유틸리티 (Security Utilities)
-         */
         const Security = {
             sanitize: (str) => {
                 const div = document.createElement('div');
@@ -234,14 +216,11 @@
                 if (!Array.isArray(data.portfolio)) return false;
                 if (!data.settings || typeof data.settings !== 'object') return false;
                 return data.portfolio.every(item => 
-                    typeof item.ticker === 'string' && 
-                    typeof item.price === 'number' &&
-                    typeof item.allocation === 'number'
+                    typeof item.ticker === 'string' && typeof item.price === 'number' && typeof item.allocation === 'number'
                 );
             }
         };
 
-        // --- 전역 상태 ---
         const AppState = {
             portfolio: [],
             chartInstance: null,
@@ -249,9 +228,6 @@
             storageKey: "richfolio_v1"
         };
 
-        /**
-         * ⚙️ 데이터 매니저
-         */
         const dataManager = {
             save: () => {
                 const payload = {
@@ -267,17 +243,18 @@
             },
             load: () => {
                 const raw = localStorage.getItem(AppState.storageKey);
-                if (!raw) return;
-                try {
-                    const data = JSON.parse(raw);
-                    if (Security.validateImportData(data)) {
-                        AppState.portfolio = data.portfolio;
-                        document.getElementById('inputAmount').value = data.settings.amount;
-                        document.getElementById('inputYears').value = data.settings.years;
-                        document.getElementById('reinvest').checked = data.settings.reinvest;
-                        uiManager.updateAll();
-                    }
-                } catch (e) { console.error("Data integrity check failed", e); }
+                if (raw) {
+                    try {
+                        const data = JSON.parse(raw);
+                        if (Security.validateImportData(data)) {
+                            AppState.portfolio = data.portfolio;
+                            document.getElementById('inputAmount').value = data.settings.amount;
+                            document.getElementById('inputYears').value = data.settings.years;
+                            document.getElementById('reinvest').checked = data.settings.reinvest;
+                            uiManager.updateAll();
+                        }
+                    } catch (e) { console.error("Data integrity check failed", e); }
+                }
             },
             exportData: () => {
                 const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(localStorage.getItem(AppState.storageKey));
@@ -297,28 +274,21 @@
                     try {
                         const parsed = JSON.parse(e.target.result);
                         if (!Security.validateImportData(parsed)) throw new Error("Invalid Format");
-                        
                         AppState.portfolio = parsed.portfolio;
                         document.getElementById('inputAmount').value = Security.sanitize(parsed.settings.amount);
                         document.getElementById('inputYears').value = parsed.settings.years;
                         document.getElementById('reinvest').checked = parsed.settings.reinvest;
-                        
                         dataManager.save();
                         uiManager.updateAll();
                         uiManager.showToast("복원 완료! 데이터 검증 통과.");
                         setTimeout(() => simulationManager.run(), 500);
-                    } catch (err) {
-                        alert("파일 형식이 올바르지 않거나 변조되었습니다.");
-                    }
+                    } catch (err) { alert("파일 형식이 올바르지 않거나 변조되었습니다."); }
                 };
                 reader.readAsText(file);
                 input.value = '';
             }
         };
 
-        /**
-         * 🎨 UI 매니저
-         */
         const uiManager = {
             formatMoney: (n) => Math.round(n).toLocaleString() + '원',
             numToKor: (num) => {
@@ -338,41 +308,33 @@
             updateAll: () => {
                 uiManager.renderPortfolio();
                 uiManager.renderTable();
-                
                 const amtVal = Security.onlyNumber(document.getElementById('inputAmount').value);
                 document.getElementById('koreanMoney').textContent = uiManager.numToKor(Number(amtVal));
                 document.getElementById('yearVal').textContent = document.getElementById('inputYears').value + "년";
-                
                 const total = AppState.portfolio.reduce((sum, i) => sum + (i.allocation||0), 0);
                 const allocBadge = document.getElementById('totalAlloc');
                 allocBadge.textContent = total + '%';
                 allocBadge.className = `text-xs font-bold px-2 py-0.5 rounded-full ${total === 100 ? 'bg-green-500 text-white' : 'bg-red-500 text-white'}`;
-                
                 document.getElementById('emptyMsg').style.display = AppState.portfolio.length === 0 ? 'block' : 'none';
             },
 
             renderPortfolio: () => {
                 const list = document.getElementById('portfolioList');
                 list.innerHTML = ''; 
-
                 AppState.portfolio.forEach((item, idx) => {
                     const div = document.createElement('div');
                     div.className = "flex items-center gap-2 bg-slate-50 p-3 rounded-lg border border-slate-200 shadow-sm fade-in";
-                    
                     const isaSpan = document.createElement('span');
                     isaSpan.className = item.isIsa 
                         ? "text-[10px] bg-green-100 text-green-700 px-1.5 py-0.5 rounded border border-green-200 ml-1" 
                         : "text-[10px] bg-slate-200 text-slate-500 px-1.5 py-0.5 rounded ml-1";
                     isaSpan.textContent = item.isIsa ? "ISA" : "직투";
-
                     div.innerHTML = `
                         <div class="flex-1 overflow-hidden">
                             <div class="flex items-center gap-1 mb-1">
                                 <span class="font-bold text-slate-800 text-sm">${Security.sanitize(item.ticker)}</span>
                             </div>
-                            <div class="text-[10px] text-slate-500">
-                                성장 <span class="text-blue-600 font-bold">${item.cagr}%</span>
-                            </div>
+                            <div class="text-[10px] text-slate-500">성장 <span class="text-blue-600 font-bold">${item.cagr}%</span></div>
                         </div>
                         <div class="flex items-center gap-1">
                             <input type="number" class="w-14 p-1 text-right text-sm border border-slate-300 rounded focus:border-blue-500 outline-none font-bold" 
@@ -381,9 +343,7 @@
                         </div>
                         <button class="text-slate-400 hover:text-red-500 p-1">×</button>
                     `;
-
                     div.querySelector('div > div').appendChild(isaSpan); 
-                    
                     const input = div.querySelector('input');
                     input.onchange = (e) => {
                         let val = parseInt(e.target.value) || 0;
@@ -392,14 +352,11 @@
                         uiManager.updateAll();
                         dataManager.save();
                     };
-
-                    const btn = div.querySelector('button');
-                    btn.onclick = () => {
+                    div.querySelector('button').onclick = () => {
                         AppState.portfolio.splice(idx, 1);
                         uiManager.updateAll();
                         dataManager.save();
                     };
-
                     list.appendChild(div);
                 });
             },
@@ -407,22 +364,18 @@
             renderTable: () => {
                 const tbody = document.getElementById('dataTableBody');
                 tbody.innerHTML = '';
-
                 AppState.portfolio.forEach((item, idx) => {
                     const tr = document.createElement('tr');
                     tr.className = "border-b hover:bg-slate-50 transition-colors";
-                    
                     const currency = item.currency === 'KRW' ? '₩' : '$';
                     const isaTxt = item.isIsa ? "ISA가능" : "해외직투";
                     const isaClass = item.isIsa ? "text-green-600 bg-green-50" : "text-slate-500 bg-slate-100";
-
                     const addCell = (html, classes="") => {
                         const td = document.createElement('td');
                         td.className = "px-4 py-3 " + classes;
                         td.innerHTML = html; 
                         tr.appendChild(td);
                     };
-
                     addCell(`<span class="font-bold text-slate-700">${Security.sanitize(item.ticker)}</span>`);
                     addCell(`${currency}${item.price.toLocaleString()}`);
                     addCell(`<span class="px-2 py-1 rounded text-xs font-bold ${isaClass}">${isaTxt}</span>`, "text-center");
@@ -442,7 +395,6 @@
                     };
                     btnTd.appendChild(btn);
                     tr.appendChild(btnTd);
-
                     tbody.appendChild(tr);
                 });
             },
@@ -479,7 +431,6 @@
                     const canvas = await html2canvas(element, { scale: 2, backgroundColor: '#ffffff', useCORS: true });
                     const imgData = canvas.toDataURL('image/png');
                     const fileName = `RichFolio_Report_${Date.now()}`;
-
                     if (type === 'image') {
                         const link = document.createElement('a');
                         link.href = imgData;
@@ -491,7 +442,6 @@
                         const w = 210, h = 297;
                         const imgH = canvas.height * w / canvas.width;
                         let heightLeft = imgH, pos = 0;
-                        
                         pdf.addImage(imgData, 'PNG', 0, pos, w, imgH);
                         heightLeft -= h;
                         while(heightLeft >= 0) {
@@ -507,27 +457,19 @@
             }
         };
 
-        /**
-         * 📡 네트워크 매니저
-         */
         const networkManager = {
             fetch: async (url) => {
                 try {
                     const res = await fetch(AppState.proxyBase + encodeURIComponent(url));
                     if (!res.ok) throw new Error("Network Error");
                     return await res.json();
-                } catch (e) {
-                    console.error("Fetch Error:", e);
-                    return null;
-                }
+                } catch (e) { console.error("Fetch Error:", e); return null; }
             },
-            
             getChartData: async (ticker) => {
                 const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ticker}?interval=1mo&range=5y`;
                 const data = await networkManager.fetch(url);
                 return data?.chart?.result?.[0] || null;
             },
-
             searchSymbol: async (query) => {
                 const url = `https://query1.finance.yahoo.com/v1/finance/search?q=${encodeURIComponent(query)}&quotesCount=6`;
                 const data = await networkManager.fetch(url);
@@ -535,26 +477,19 @@
             }
         };
 
-        /**
-         * 🧠 로직 매니저
-         */
         const logicManager = {
             addTicker: async (inputQuery) => {
                 let query = Security.safeTicker(inputQuery || document.getElementById('tickerInput').value);
                 if (!query) return;
-
                 if (AppState.portfolio.find(p => p.ticker === query)) {
                     uiManager.showToast("이미 추가된 종목입니다.");
                     document.getElementById('tickerInput').value = '';
                     return;
                 }
-
                 uiManager.toggleLoading(true, "데이터 보안 분석 중...");
-
                 try {
                     let chartData = null;
                     let targetTicker = query;
-
                     if (/^\d{6}$/.test(query)) {
                         targetTicker = query + ".KS";
                         chartData = await networkManager.getChartData(targetTicker);
@@ -565,23 +500,18 @@
                     } else {
                         chartData = await networkManager.getChartData(targetTicker);
                     }
-
                     if (!chartData) throw new Error("Not Found");
-
                     const meta = chartData.meta;
                     const quotes = chartData.indicators.quote[0].close;
                     const price = meta.regularMarketPrice;
                     const currency = meta.currency;
-                    
                     const isIsa = currency === 'KRW' || targetTicker.endsWith('.KS') || targetTicker.endsWith('.KQ');
-
                     let cagr = 5.0;
                     const startPrice = quotes.find(p => p != null);
                     if (startPrice && price) {
                         const years = (meta.regularMarketTime - chartData.timestamp[0]) / (3600*24*365);
                         if(years > 0.5) cagr = ((Math.pow(price / startPrice, 1/years) - 1) * 100);
                     }
-
                     let divYield = 0;
                     if (chartData.events && chartData.events.dividends) {
                         const divs = Object.values(chartData.events.dividends);
@@ -589,7 +519,6 @@
                         const totalDiv = divs.filter(d => d.date > oneYearAgo).reduce((a,b) => a + b.amount, 0);
                         if(price > 0) divYield = (totalDiv / price) * 100;
                     }
-
                     AppState.portfolio.push({
                         ticker: targetTicker,
                         price: price,
@@ -599,35 +528,25 @@
                         yield: parseFloat(divYield.toFixed(2)),
                         allocation: 0
                     });
-
                     uiManager.updateAll();
                     dataManager.save();
                     document.getElementById('tickerInput').value = '';
-
                 } catch (e) {
                     uiManager.showToast("종목 정보를 불러올 수 없습니다.");
-                } finally {
-                    uiManager.toggleLoading(false);
-                }
+                } finally { uiManager.toggleLoading(false); }
             },
-
             autoComplete: async (val) => {
                 const box = document.getElementById('suggestionBox');
                 if (val.length < 1) { box.classList.add('hidden'); return; }
-                
                 const quotes = await networkManager.searchSymbol(val);
                 const valid = quotes.filter(q => ['ETF','EQUITY','MUTUALFUND'].includes(q.quoteType));
-                
                 box.innerHTML = '';
                 if (valid.length === 0) { box.classList.add('hidden'); return; }
-
                 valid.forEach(q => {
                     const div = document.createElement('div');
                     div.className = "p-3 hover:bg-slate-50 cursor-pointer border-b last:border-0";
-                    
                     const isKRW = q.symbol.endsWith('.KS') || q.symbol.endsWith('.KQ');
                     const badge = isKRW ? '<span class="text-[10px] bg-green-100 text-green-700 px-1 rounded ml-1">ISA</span>' : '';
-                    
                     div.innerHTML = `
                         <div class="flex justify-between items-center">
                             <div>
@@ -635,7 +554,6 @@
                                 <span class="text-xs text-slate-500 truncate inline-block align-bottom max-w-[150px]">${Security.sanitize(q.shortname || q.longname)}</span>
                             </div>
                         </div>`;
-                    
                     div.onclick = (e) => {
                         e.stopPropagation();
                         document.getElementById('tickerInput').value = q.symbol;
@@ -654,57 +572,43 @@
                 const monthlyAmt = parseInt(amtStr) || 0;
                 const years = parseInt(document.getElementById('inputYears').value);
                 const reinvest = document.getElementById('reinvest').checked;
-
                 const totalAlloc = AppState.portfolio.reduce((sum, i) => sum + (i.allocation||0), 0);
                 if (totalAlloc !== 100) return alert(`비중 합계는 100%여야 합니다. (현재 ${totalAlloc}%)`);
                 if (monthlyAmt <= 0) return alert("투자 금액을 입력해주세요.");
-
                 let wCagr = 0, wYield = 0;
                 AppState.portfolio.forEach(p => {
                     wCagr += p.cagr * (p.allocation/100);
                     wYield += p.yield * (p.allocation/100);
                 });
-
                 const months = years * 12;
                 const mGrowth = wCagr / 100 / 12;
                 const mDiv = wYield / 100 / 12;
-
                 let principal = 0, balance = 0, totalDiv = 0, cash = 0;
                 const labels = [], dPrin = [], dBal = [];
-
                 for(let i=1; i<=months; i++) {
                     principal += monthlyAmt;
                     balance += monthlyAmt;
                     balance *= (1 + mGrowth);
-                    
                     let div = balance * mDiv;
                     totalDiv += div;
-
-                    if(reinvest) balance += div;
-                    else cash += div;
-
+                    if(reinvest) balance += div; else cash += div;
                     if(i % 12 === 0) {
                         labels.push((i/12)+"년");
                         dPrin.push(principal);
                         dBal.push(Math.round(reinvest ? balance : balance + cash));
                     }
                 }
-
                 const final = Math.round(reinvest ? balance : balance + cash);
                 const roi = ((final - principal) / principal) * 100;
-
                 document.getElementById('resPrincipal').textContent = uiManager.formatMoney(principal);
                 document.getElementById('resDividend').textContent = uiManager.formatMoney(totalDiv);
                 document.getElementById('resFinal').textContent = uiManager.formatMoney(final);
                 document.getElementById('resRoi').textContent = (roi > 0 ? '+' : '') + roi.toFixed(1) + '%';
-
                 simulationManager.drawChart(labels, dPrin, dBal);
             },
-
             drawChart: (labels, d1, d2) => {
                 const ctx = document.getElementById('chart').getContext('2d');
                 if (AppState.chartInstance) AppState.chartInstance.destroy();
-
                 AppState.chartInstance = new Chart(ctx, {
                     type: 'line',
                     data: {
@@ -725,39 +629,34 @@
             }
         };
 
-        // --- Event Listeners ---
         let debounceTimer;
         document.getElementById('tickerInput').addEventListener('input', (e) => {
             clearTimeout(debounceTimer);
             debounceTimer = setTimeout(() => logicManager.autoComplete(e.target.value.toUpperCase()), 300);
         });
-        
         document.getElementById('tickerInput').addEventListener('keypress', (e) => {
             if(e.key === 'Enter') {
                 uiManager.closeSuggestions();
                 logicManager.addTicker();
             }
         });
-
         document.getElementById('addBtn').addEventListener('click', () => {
             uiManager.closeSuggestions();
             logicManager.addTicker();
         });
-
         document.getElementById('inputAmount').addEventListener('input', (e) => {
             e.target.value = e.target.value.replace(/[^0-9]/g, '').replace(/\B(?=(\d{3})+(?!\d))/g, ",");
             dataManager.save();
             uiManager.updateAll();
         });
-
         document.getElementById('inputYears').addEventListener('input', (e) => {
             dataManager.save();
             uiManager.updateAll();
         });
 
-        // Initialize
-        window.addEventListener('DOMContentLoaded', dataManager.load);
-
+        window.addEventListener('DOMContentLoaded', () => {
+            dataManager.load();
+        });
     </script>
 </body>
 </html>
