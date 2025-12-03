@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- [보안 정책] -->
+    <!-- [보안 정책] hits.sh 허용 -->
     <meta http-equiv="Content-Security-Policy" content="
         default-src 'self'; 
         script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.tailwindcss.com https://cdn.jsdelivr.net https://cdnjs.cloudflare.com; 
@@ -17,11 +17,11 @@
     <!-- SEO Meta Tags -->
     <title>RichFolio | ETF 수익률 계산기 & 시뮬레이터</title>
     <meta name="description" content="미국/한국 ETF 적립식 투자 시뮬레이터. 실시간 데이터 연동, ISA 계좌 구분, 배당 재투자 복리 계산, PDF 리포트 제공.">
-    <meta name="keywords" content="ETF 시뮬레이터, 복리 계산기, 미국주식, ISA, 적립식 투자, 배당금 재투자, SCHD, QQQ">
+    <meta name="keywords" content="ETF 시뮬레이터, 복리 계산기, 미국주식, ISA, 적립식 투자, 배당금 재투자, SCHD, QQQ, TIGER 미국테크TOP10">
     <meta property="og:title" content="RichFolio - 내 자산의 미래를 시뮬레이션하세요">
     <meta property="og:description" content="클릭 몇 번으로 10년 뒤 자산을 확인하세요. 보안 강화된 웹앱으로 안전하게 사용 가능합니다.">
     <!-- [중요] 주소 충돌 방지를 위해 '/etf-sim/' 경로 명시 -->
-    <meta property="og:url" content="https://grid-worker.github.io/etf-sim/">
+    <meta property="og:url" content="https://etf-sim.github.io/">
     
     <!-- Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -50,10 +50,9 @@
                 <span class="text-[10px] bg-green-100 text-green-700 px-2 py-1 rounded-full font-bold ml-1 border border-green-200">Secure</span>
                 
                 <!-- [Global Visitor Counter] -->
-                <!-- [수정] '/etf-sim/' 하위 경로까지 정확히 지정하여 컷라인 메이커와 카운팅 분리 -->
                 <div class="ml-2 pt-1 flex items-center" title="총 누적 방문자">
-                    <a href="https://hits.sh/grid-worker.github.io/etf-sim/">
-                        <img alt="Hits" src="https://hits.sh/grid-worker.github.io/etf-sim.svg?style=flat&label=Visits&extra=count&color=4f46e5&labelColor=555555"/>
+                    <a href="https://hits.sh/etf-sim.github.io/">
+                        <img alt="Hits" src="https://hits.sh/etf-sim.github.io.svg?style=flat&label=Visits&extra=count&color=4f46e5&labelColor=555555"/>
                     </a>
                 </div>
             </div>
@@ -70,7 +69,7 @@
         </div>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6">
+    <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-12 gap-6 min-h-[calc(100vh-200px)]">
 
         <!-- 좌측 패널 -->
         <div class="col-span-1 lg:col-span-4 space-y-6 order-2 lg:order-1">
@@ -186,12 +185,36 @@
             <div class="ad-area w-full h-24 rounded-lg mt-4 bg-slate-100 flex items-center justify-center text-slate-400 text-sm border-2 border-dashed border-slate-200" data-html2canvas-ignore="true">
                 Google AdSense Area
             </div>
-
-            <div class="text-center text-xs text-slate-400 mt-4 pb-4">
-                * 본 서비스는 클라이언트 보안 표준을 준수하며 서버로 데이터를 전송하지 않습니다.
-            </div>
         </div>
     </main>
+
+    <!-- [푸터] 문의처 정보 및 저작권 표시 -->
+    <footer class="bg-white border-t mt-12 py-10">
+        <div class="max-w-7xl mx-auto px-4 flex flex-col items-center justify-center space-y-4 text-center">
+            
+            <!-- 브랜드 & 저작권 -->
+            <div>
+                <h2 class="text-xl font-bold text-slate-800 flex items-center justify-center gap-2 mb-1">
+                    <span class="text-2xl">📈</span> RichFolio
+                </h2>
+                <p class="text-xs text-slate-400">
+                    &copy; 2024 RichFolio. All rights reserved.<br>
+                    * 본 서비스는 클라이언트 보안 표준을 준수하며 서버로 투자 데이터를 전송하지 않습니다.
+                </p>
+            </div>
+
+            <!-- 문의처 링크 -->
+            <div class="flex items-center gap-4 text-sm text-slate-500">
+                <a href="mailto:nosound1318@naver.com" class="hover:text-blue-600 transition flex items-center gap-1 group">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 group-hover:text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    문의: nosound1318@naver.com
+                </a>
+            </div>
+
+        </div>
+    </footer>
 
     <!-- 로딩 -->
     <div id="loading" class="hidden fixed inset-0 bg-slate-900/50 z-[60] flex items-center justify-center backdrop-blur-sm">
